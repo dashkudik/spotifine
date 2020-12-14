@@ -9,6 +9,7 @@
         android:padding="4dp">
 
     <ImageView
+            android:scaleType="centerCrop"
             android:id="@+id/imageViewListPic"
             android:layout_width="64dp"
             android:layout_height="64dp"

@@ -1,13 +1,15 @@
-package com.archrahkshi.spotifine.ui
+package com.archrahkshi.spotifine.ui.library
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.archrahkshi.spotifine.R
 import com.archrahkshi.spotifine.data.TracksAdapter
+import com.archrahkshi.spotifine.ui.PlayerActivity
 import com.archrahkshi.spotifine.util.ACCESS_TOKEN
 import com.archrahkshi.spotifine.util.ARTISTS
 import com.archrahkshi.spotifine.util.DURATION
@@ -24,6 +26,7 @@ import kotlinx.android.synthetic.main.fragment_tracks.recyclerViewTracks
 import kotlinx.android.synthetic.main.fragment_tracks.textViewHeaderLine1
 import kotlinx.android.synthetic.main.fragment_tracks.textViewHeaderLine2
 import kotlinx.android.synthetic.main.fragment_tracks.textViewHeaderLine3
+import kotlinx.android.synthetic.main.toolbar.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,6 +37,10 @@ import kotlin.time.ExperimentalTime
 class TracksFragment(
     override val coroutineContext: CoroutineContext = Dispatchers.Main.immediate
 ) : Fragment(), CoroutineScope {
+
+    private val presenter by lazy { (requireActivity() as LibraryActivity).presenter }
+    private val args by lazy { requireArguments() }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -44,24 +51,21 @@ class TracksFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val args = this.arguments!!
+        Log.i("GG", args.getString(NAME))
 
-        textViewHeaderLine1.text = args.getString(NAME)
+        presenter.apply {
+            with(args) {
 
-        val artists = args.getString(ARTISTS)
-        if (artists != null)
-            textViewHeaderLine2.text = artists
-        else
-            textViewHeaderLine2.visibility = View.GONE
+                setHeaderText(getString(NAME)!!)
+                setHeaderSubtext(getString(ARTISTS))
+                setHeaderAdditionalText(getString(R.string.header_line3, getInt(SIZE),
+                        setWordTracks(context, getInt(SIZE))))
+                setToolbarTitle(getString(R.string.title_tracks))
+                showBackButton()
+                setHeaderImage(getString(IMAGE)!!)
 
-        val size = args.getInt(SIZE)
-        textViewHeaderLine3.text = getString(
-            R.string.header_line3,
-            size,
-            setWordTracks(context, size)
-        )
-
-        Glide.with(this).load(args.getString(IMAGE)).into(imageViewHeader)
+            }
+        }
 
         launch {
             recyclerViewTracks.adapter = TracksAdapter(
